@@ -1,0 +1,54 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+public class InsertUser {
+
+    static final String JDBC_URL =
+        "jdbc:mysql://localhost:3306/mydatabase";
+    static final String USERNAME = "root";
+    static final String PASSWORD = "your_password";
+
+    public static void main(String[] args) {
+
+        String createTable = "CREATE TABLE IF NOT EXISTS users ("
+                + "id INT PRIMARY KEY AUTO_INCREMENT, "
+                + "name VARCHAR(100) NOT NULL, "
+                + "email VARCHAR(100) NOT NULL"
+                + ")";
+
+        String insertSQL =
+                "INSERT INTO users (name, email) VALUES (?, ?)";
+
+        try (Connection connection = DriverManager.getConnection(
+                    JDBC_URL, USERNAME, PASSWORD)) {
+
+            // Create the table if it does not exist
+            try (Statement stmt = connection.createStatement()) {
+                stmt.executeUpdate(createTable);
+            }
+
+            // Insert two user records
+            try (PreparedStatement pstmt =
+                    connection.prepareStatement(insertSQL)) {
+
+                pstmt.setString(1, "John Doe");
+                pstmt.setString(2, "john@example.com");
+                pstmt.executeUpdate();
+
+                pstmt.setString(1, "Jane Doe");
+                pstmt.setString(2, "jane@example.com");
+                pstmt.executeUpdate();
+            }
+
+            System.out.println("Data inserted successfully.");
+
+        } catch (SQLException e) {
+            System.out.println(
+                "Database error: " + e.getMessage()
+            );
+        }
+    }
+}
